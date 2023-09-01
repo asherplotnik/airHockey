@@ -1,0 +1,86 @@
+.Game {
+    color: white;
+    width: 100vw;
+}
+
+.Table {
+    border: solid white 4px;
+    border-radius: 2vh;
+    height: 99vh;
+    width: 65vh;
+    margin: auto;
+    cursor: none; 
+}
+
+.Area1 {
+    border-radius: 2vh;
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.Area2 {
+    border-radius: 2vh;
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.Goal1 {
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: solid 4px black;
+    width: 10%;
+}
+
+.Goal2 {
+    position: fixed;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: solid 5px black;
+    width: 10%;
+}
+
+.Player1 {
+    background-color: white;
+    width: 5vh;
+    height: 5vh;
+    border-radius: 3vh;
+    margin-top: 1vh;
+}
+
+.Player2 {
+    position:absolute;
+    background-color: white;
+    width: 5vh;
+    height: 5vh;
+    border-radius: 3vh;
+    margin-bottom: 1vh;
+}
+
+.Disk {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color:wheat ;
+    width: 4vh;
+    height: 4vh;
+    border-radius: 3vh;
+}
+
+.Position {
+    position: fixed;
+    border: 1px solid white ;
+    border-radius: 0.5vh;
+    width: 10vh;
+    height: 4vh;
+    margin:1vh;
+
+}
