@@ -63,7 +63,6 @@
     width: 5vh;
     height: 5vh;
     border-radius: 3vh;
-    margin-bottom: 1vh;
 
 }
 
@@ -73,34 +72,29 @@
     width: 0.1vh;
     height: 0.1vh;
     border-radius: 3vh;
-    margin-bottom: 1vh;
-
-}
-.Player2Mid {
-    position:absolute;
-    background-color: wheat;
-    width: 2.5vh;
-    height: 2.5vh;
-    border-radius: 3vh;
-    margin-bottom: 1vh;
 
 }
 
 .Disk {
     position: absolute;
-    transform: translate(-50%, -50%);
     background-color:wheat ;
     width: 4vh;
     height: 4vh;
     border-radius: 3vh;
-    z-index: 1;
+}
+
+.DiskCenter {
+    position:absolute;
+    background-color: black;
+    width: 0.1vh;
+    height: 0.1vh;
+    border-radius: 3vh;
 }
 
 .PositionPlayer {
     position: fixed;
     border: 1px solid white ;
     border-radius: 0.5vh;
-    
     height: 4vh;
     margin:1vh;
 
