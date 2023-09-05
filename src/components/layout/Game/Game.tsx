@@ -1,5 +1,6 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import classes from "./Game.module.css";
+import io from 'socket.io-client';
 
 interface ScreenPosition {
   x: number;
@@ -129,6 +130,7 @@ const Game = () => {
     if (mousePosition.y < minY) {
       result.y = minY - screenSize.y / 40;
     }
+    sendMessage(result.x + "|" + result.y);
     return result;
   };
 

@@ -6,7 +6,7 @@ const Home = () => {
   return (
     <div className={classes.Home}>
       {/* <div className={classes.HomeItem} onClick={() => navigate("/create")}> */}
-      <div className={classes.HomeItem} onClick={() => navigate("/game")}> 
+      <div className={classes.HomeItem} onClick={() => navigate("/create")}> 
         CREATE GAME
       </div>
       <div className={classes.HomeItem} onClick={() => navigate("/join")}>
