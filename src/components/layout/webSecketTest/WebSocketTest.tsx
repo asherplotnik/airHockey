@@ -2,16 +2,30 @@ import { useEffect, useState } from "react";
 import classes from "./CreateGame.module.css";
 import io, { Socket } from 'socket.io-client';
 
-const CreateGame = () => {
+interface Telemetry {
+    game: number;
+    xPlayer: number;
+    yPlayer: number;
+    height:  number;
+    xDisk: number;
+    yDisk: number;
+}
+
+const WebSocketTest = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [message, setMessage] = useState<string>('');
   const [messages, setMessages] = useState<string[]>([]);
+  const [telemtry, setTelemetry] = useState<Telemetry | null>(null);
 
   useEffect(() => {
     const socket = io('http://localhost:3000/ws'); 
     socket.on('message', payload => {
       setMessage(payload.message);
       setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    socket.on('telemetry', payload => {
+      setTelemetry(payload.telemetry);
     });
 
     setSocket(socket);
@@ -38,4 +52,4 @@ const CreateGame = () => {
     );
 }
 
-export default CreateGame
+export default WebSocketTest;

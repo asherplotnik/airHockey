@@ -1,11 +1,11 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import classes from "./CreateGame.module.css";
-import { AppContext } from "../../../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { deepCloneUserState } from "../../../Services/commonFunctionService";
+import { useUserContext } from "../../../context/AppContext";
 
 const CreateGame = () => {
-  const context = useContext(AppContext);
+  const context = useUserContext();
   const [name, setName] = useState<string>("");
   const [isNameValid, setIsNameValid] = useState<boolean | null>(null);
   const navigate = useNavigate();

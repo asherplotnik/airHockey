@@ -1,21 +1,42 @@
 import { useEffect, useState } from "react";
 import classes from "./Game.module.css";
 import { useUserContext } from "../../../context/AppContext";
+import { Socket, io } from "socket.io-client";
+import globals from "../../../Services/Globals";
 
 interface ScreenPosition {
   x: number;
   y: number;
 }
 
+
+interface Telemetry {
+    game: string;
+    xPlayer: number;
+    yPlayer: number;
+    height:  number;
+    xDisk: number;
+    yDisk: number;
+}
+
 const Game = () => {
-    const [scoreP1, setScoreP1] = useState(0);
-    const [scoreP2, setScoreP2] = useState(0);
-    const userContext = useUserContext().user;
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [message, setMessage] = useState<string>('');
+  const [messages, setMessages] = useState<string[]>([]);
+  const [telemetry, setTelemetry] = useState<Telemetry | null>(null);
+  const context = useUserContext();
+  const [scoreP1, setScoreP1] = useState(0);
+  const [scoreP2, setScoreP2] = useState(0);
+  const userContext = useUserContext().user;
   const [mousePosition, setMousePosition] = useState<ScreenPosition>({
     x: 0,
     y: 0,
   });
   const [playerPosition, setPlayerPosition] = useState<ScreenPosition>({
+    x: 0,
+    y: 0,
+  });
+  const [playerPosition2, setPlayerPosition2] = useState<ScreenPosition>({
     x: 0,
     y: 0,
   });
@@ -28,13 +49,73 @@ const Game = () => {
     y: window.innerHeight / 1.2,
   });
   const [diskSpeed, setDiskSpeed] = useState<ScreenPosition>({ x: 0, y: 0 });
+  let playerCenter = {
+    x: playerPosition.x + screenSize.y / 41,
+    y: playerPosition.y + screenSize.y / 41,
+  } as ScreenPosition;
+  let playerCenter2 = {
+    x: playerPosition2.x + screenSize.y / 41,
+    y: playerPosition2.y + screenSize.y / 41,
+  } as ScreenPosition;
+  let diskCenter = {
+    x: diskPosition.x + screenSize.y / 51,
+    y: diskPosition.y + screenSize.y / 51,
+  } as ScreenPosition;
   const handleMouseMove = (e: MouseEvent) => {
     setMousePosition({ x: e.clientX, y: e.clientY });
   };
 
-  const handleResize = () => {
-    setScreenSize({ x: window.innerWidth, y: window.innerHeight });
-  };
+  useEffect(() => {
+    const socket = io(globals.urls.apiWs); 
+    socket.on('message', payload => {
+      setMessage(payload.message);
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    socket.on('telemetry', payload => {
+      setTelemetry(payload.telemetry);
+    });
+
+    setSocket(socket);
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+   useEffect(() => {
+     let xp = telemetry?.xPlayer;
+     let yp = telemetry?.yPlayer;
+     if (xp > 0 && yp > 0)
+     yp = screenSize.y - (yp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
+     xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
+     setPlayerPosition2({x:xp, y:yp});
+   },[telemetry]);
+
+  useEffect(()=> {
+    const joinGame = (game: string) => {
+        if (socket) {
+            socket.emit('join_game', game);
+        }
+    };
+
+    if (context.user.userGame !== null){
+        joinGame(context.user.userGame);
+    }
+  },[])
+
+  const sendTelemetry = () => {
+    const telemetry: Telemetry = {
+        game: context.user.userGame,
+        height: window.innerHeight,
+        xPlayer: playerPosition.x,
+        yPlayer: playerPosition.y,
+        xDisk: diskPosition.x,
+        yDisk: diskPosition.y
+    }
+    if(socket) {
+        socket.emit("telemetry", telemetry)
+    }
+  }
 
   useEffect(() => {
     const setNewDiskPositionBySpeed = () => {
@@ -54,9 +135,9 @@ const Game = () => {
       if (diskPosition.y > minY && diskPosition.y < maxY) {
         result.y = y;
       } else {
-        if (isGoal()){
-            resetGame();
-            return;
+        if (isGoal()) {
+          resetGame();
+          return;
         }
 
         result.y = diskPosition.y + diskSpeed.y / 100;
@@ -68,27 +149,30 @@ const Game = () => {
     };
 
     const resetGame = () => {
-        if(diskPosition.y > window.innerHeight / 1.2) {
-            setScoreP1(prev=>prev+1);
-        } else {
-            setScoreP2(prev=>prev+1);
-        }
-        setDiskPosition({
-            x: window.innerWidth / 2 - window.innerWidth / 51,
-            y: window.innerHeight / 1.2,
-        });
-        setPlayerPosition({x: window.innerWidth / 2 - window.innerWidth / 10,y: window.innerHeight / 1.2});
-        setDiskSpeed({x:0,y:0});
-    }
+      if (diskPosition.y > window.innerHeight / 1.2) {
+        setScoreP1((prev) => prev + 1);
+      } else {
+        setScoreP2((prev) => prev + 1);
+      }
+      setDiskPosition({
+        x: window.innerWidth / 2 - window.innerWidth / 51,
+        y: window.innerHeight / 1.2,
+      });
+      setPlayerPosition({
+        x: window.innerWidth / 2 - window.innerWidth / 10,
+        y: window.innerHeight / 1.2,
+      });
+      setDiskSpeed({ x: 0, y: 0 });
+    };
 
-    const isGoal = ():boolean => {
-        const x1 = window.innerWidth / 2 - window.innerWidth / 14;
-        const x2 = window.innerWidth / 2 + window.innerWidth / 19;
-        if (diskCenter.x >= x1 && diskCenter.x <= x2)  {
-            return true;
-        }
-        return false;
-    }
+    const isGoal = (): boolean => {
+      const x1 = window.innerWidth / 2 - window.innerWidth / 14;
+      const x2 = window.innerWidth / 2 + window.innerWidth / 19;
+      if (diskCenter.x >= x1 && diskCenter.x <= x2) {
+        return true;
+      }
+      return false;
+    };
 
     setNewDiskPositionBySpeed();
   }, [diskPosition, diskSpeed]);
@@ -98,14 +182,19 @@ const Game = () => {
       setPlayerPosition(updateMouseNewPlayerPosition());
     };
 
+    const handleResize = () => {
+      setScreenSize({ x: window.innerWidth, y: window.innerHeight });
+    };
+
     updatePositions();
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("resize", handleResize);
+    sendTelemetry();
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [mousePosition,screenSize]);
+  }, [mousePosition, screenSize]);
 
   const updateMouseNewPlayerPosition = (): ScreenPosition => {
     const maxX = screenSize.x / 2 + screenSize.y * 0.3;
@@ -134,102 +223,97 @@ const Game = () => {
     return result;
   };
 
-  let playerCenter = {
-    x: playerPosition.x + screenSize.y / 41,
-    y: playerPosition.y + screenSize.y / 41,
-  } as ScreenPosition;
-  let diskCenter = {
-    x: diskPosition.x + screenSize.y / 51,
-    y: diskPosition.y + screenSize.y / 51,
-  } as ScreenPosition;
-  
-  
-  
-  useEffect(() =>{
+  useEffect(() => {
     const listenImpactDisk = () => {
+      if (
+        screenSize.y / 41 + screenSize.y / 51 >
+        Math.sqrt(
+          Math.pow(playerCenter.x - diskCenter.x, 2) +
+            Math.pow(playerCenter.y - diskCenter.y, 2)
+        )
+      ) {
+        const newPosition = calcNewDiskPosition(diskPosition);
         if (
-          screenSize.y / 41 + screenSize.y / 51 >
-          Math.sqrt(
-            Math.pow(playerCenter.x - diskCenter.x, 2) +
-              Math.pow(playerCenter.y - diskCenter.y, 2)
-          )
+          newPosition.x != diskPosition.x ||
+          newPosition.y != diskPosition.y
         ) {
-          const newPosition = calcNewDiskPosition(diskPosition);
-          if (newPosition.x != diskPosition.x || newPosition.y != diskPosition.y) {
-            setDiskPosition(newPosition);
-            setDiskSpeed(calcNewSpeed());
-          }
-          if (newPosition.x == diskPosition.x && newPosition.y == diskPosition.y) {
-            resetPlayer();
-          }
+          setDiskPosition(newPosition);
+          setDiskSpeed(calcNewSpeed());
         }
-      };
-    
-      const calcNewSpeed = (): ScreenPosition => {
-        const x = playerCenter.x - diskCenter.x;
-        const y = playerCenter.y - diskCenter.y;
-        return { x, y };
-      };
-    
-      const calcNewDiskPosition = (prev: ScreenPosition): ScreenPosition => {
-        const maxX = screenSize.x / 2 + screenSize.y * 0.285;
-        const minX = screenSize.x / 2 - screenSize.y * 0.325;
-        const maxY = screenSize.y - screenSize.y / 22;
-        const minY = screenSize.y / 30;
-        const x = prev.x - (playerCenter.x - diskCenter.x) / 6;
-        const y = prev.y - (playerCenter.y - diskCenter.y) / 6;
-        let result = { x: prev.x, y: prev.y };
-        if (prev.x > minX && prev.x < maxX) {
-          result.x = x;
+        if (
+          newPosition.x == diskPosition.x &&
+          newPosition.y == diskPosition.y
+        ) {
+          resetPlayer();
         }
-        if (prev.y > minY && prev.y < maxY) {
-          result.y = y;
-        }
-        return result;
-      };
-    
-      const resetPlayer = () => {
-        const x = playerCenter.x - diskCenter.x;
-        const y = playerCenter.y - diskCenter.y;
-        const resetPosition = { x: playerPosition.x, y: playerPosition.y };
-        if (x < 0) {
-          resetPosition.x = playerPosition.x - 1;
-        }
-        if (x > 0) {
-          resetPosition.x = playerPosition.x + 1;
-        }
-        if (y < 0) {
-          resetPosition.y = playerPosition.y - 1;
-        }
-        if (y > 0) {
-          resetPosition.y = playerPosition.y + 1;
-        }
-        setPlayerPosition(resetPosition);
-      };
+      }
+    };
+
+    const calcNewSpeed = (): ScreenPosition => {
+      const x = playerCenter.x - diskCenter.x;
+      const y = playerCenter.y - diskCenter.y;
+      return { x, y };
+    };
+
+    const calcNewDiskPosition = (prev: ScreenPosition): ScreenPosition => {
+      const maxX = screenSize.x / 2 + screenSize.y * 0.285;
+      const minX = screenSize.x / 2 - screenSize.y * 0.325;
+      const maxY = screenSize.y - screenSize.y / 22;
+      const minY = screenSize.y / 30;
+      const x = prev.x - (playerCenter.x - diskCenter.x) / 6;
+      const y = prev.y - (playerCenter.y - diskCenter.y) / 6;
+      let result = { x: prev.x, y: prev.y };
+      if (prev.x > minX && prev.x < maxX) {
+        result.x = x;
+      }
+      if (prev.y > minY && prev.y < maxY) {
+        result.y = y;
+      }
+      return result;
+    };
+
+    const resetPlayer = () => {
+      const x = playerCenter.x - diskCenter.x;
+      const y = playerCenter.y - diskCenter.y;
+      const resetPosition = { x: playerPosition.x, y: playerPosition.y };
+      if (x < 0) {
+        resetPosition.x = playerPosition.x - 1;
+      }
+      if (x > 0) {
+        resetPosition.x = playerPosition.x + 1;
+      }
+      if (y < 0) {
+        resetPosition.y = playerPosition.y - 1;
+      }
+      if (y > 0) {
+        resetPosition.y = playerPosition.y + 1;
+      }
+      setPlayerPosition(resetPosition);
+    };
     listenImpactDisk();
- },[diskPosition,playerPosition]);
+    sendTelemetry();
+  }, [diskPosition, playerPosition, screenSize]);
 
   return (
     <div className={classes.Game}>
       <div className={classes.PositionPlayer}>
-        player1: ( {Math.round(playerCenter.x, 1)} |{" "}
-        {Math.round(playerCenter.y, 1)} )
+        player1: ( {Math.round(playerCenter.x)} |{" "}
+        {Math.round(playerCenter.y)} )
       </div>
       <div className={classes.PositionDisk}>
-        disk: ( {Math.round(diskCenter.x, 1)} | {Math.round(diskCenter.y, 1)} )
+        disk: ( {Math.round(diskCenter.x)} | {Math.round(diskCenter.y)} )
         <br />
         <br />
-        <div className={classes.PositionDisk}>
-            Game: {userContext.userGame} 
-        </div>
+        <div className={classes.PositionDisk}>Game: {userContext.userGame}</div>
+        <br />
+        screen height: {window.innerHeight}
         <br />
         <br />
         Player 1 : {scoreP1}
         <br />
         Player 2 : {scoreP2}
       </div>
-      <div className={classes.PositionDisk}>
-      </div>
+      <div className={classes.PositionDisk}></div>
       <div className={classes.Goal1}></div>
       <div className={classes.Goal2}></div>
       <div className={classes.Table}>
