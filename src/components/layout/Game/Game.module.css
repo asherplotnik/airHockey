@@ -48,7 +48,7 @@
     width: 15%;
 }
 
-.Player1 {
+.Player2 {
     background-color: white;
     width: 5vh;
     height: 5vh;
@@ -57,7 +57,7 @@
 
 }
 
-.Player2 {
+.Player1 {
     position:absolute;
     background-color: white;
     width: 5vh;

@@ -73,6 +73,7 @@ const Game = () => {
     });
 
     socket.on('telemetry', payload => {
+      console.log(payload.telemetry);
       setTelemetry(payload.telemetry);
     });
 
@@ -83,12 +84,13 @@ const Game = () => {
   }, []);
 
    useEffect(() => {
-     let xp = telemetry?.xPlayer;
-     let yp = telemetry?.yPlayer;
-     if (xp > 0 && yp > 0)
-     yp = screenSize.y - (yp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
-     xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
-     setPlayerPosition2({x:xp, y:yp});
+     const translatePosition = (xp: number, yp: number):ScreenPosition => {
+        if (xp > 0 && yp > 0)
+        yp = screenSize.y - (yp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
+        xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
+        return {x:xp,y:yp};
+     }
+     setPlayerPosition2(translatePosition(telemetry?.xPlayer, telemetry?.yPlayer));
    },[telemetry]);
 
   useEffect(()=> {
@@ -322,11 +324,14 @@ const Game = () => {
           style={{ left: diskPosition.x, top: diskPosition.y }}
         ></div>
         <div className={classes.Area1}>
-          <div className={classes.Player1}></div>
+          <div 
+            className={classes.Player2}
+            style={{ left: playerPosition2.x, top: playerPosition2.y }}
+          ></div>
         </div>
         <div className={classes.Area2}>
           <div
-            className={classes.Player2}
+            className={classes.Player1}
             style={{ left: playerPosition.x, top: playerPosition.y }}
           ></div>
         </div>
