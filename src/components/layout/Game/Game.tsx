@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import classes from "./Game.module.css";
+import { useUserContext } from "../../../context/AppContext";
 
 interface ScreenPosition {
   x: number;
@@ -9,6 +10,7 @@ interface ScreenPosition {
 const Game = () => {
     const [scoreP1, setScoreP1] = useState(0);
     const [scoreP2, setScoreP2] = useState(0);
+    const userContext = useUserContext().user;
   const [mousePosition, setMousePosition] = useState<ScreenPosition>({
     x: 0,
     y: 0,
@@ -217,12 +219,16 @@ const Game = () => {
         disk: ( {Math.round(diskCenter.x, 1)} | {Math.round(diskCenter.y, 1)} )
         <br />
         <br />
-        screen size y : {screenSize.y}
+        <div className={classes.PositionDisk}>
+            Game: {userContext.userGame} 
+        </div>
         <br />
         <br />
         Player 1 : {scoreP1}
         <br />
         Player 2 : {scoreP2}
+      </div>
+      <div className={classes.PositionDisk}>
       </div>
       <div className={classes.Goal1}></div>
       <div className={classes.Goal2}></div>

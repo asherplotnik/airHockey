@@ -1,3 +1,31 @@
 .JoinGame {
     margin: 0;
+    color: white;
 }
+
+.GameList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    
+}
+  
+  .GameItem {
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border: 2px solid white;
+    list-style-type: none
+  }
+  
+  .Selected {
+    background-color: grey;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border: 2px solid white;
+    list-style-type: none
+  }
+  

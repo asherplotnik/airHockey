@@ -1,42 +1,62 @@
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import classes from "./CreateGame.module.css";
-import io, { Socket } from 'socket.io-client';
+import { AppContext } from "../../../context/AppContext";
+import { useNavigate } from "react-router-dom";
+import { deepCloneUserState } from "../../../Services/commonFunctionService";
 
 const CreateGame = () => {
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [message, setMessage] = useState<string>('');
-  const [messages, setMessages] = useState<string[]>([]);
-
-  useEffect(() => {
-    const socket = io('http://localhost:3000/ws'); 
-    socket.on('message', payload => {
-        console.log(payload);
-      setMessage(payload.message);
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
-    setSocket(socket);
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  const joinGame = (sendMessage: string) => {
-    if (socket) {
-        socket.emit('join_game', sendMessage);
-    }
+  const context = useContext(AppContext);
+  const [name, setName] = useState<string>("");
+  const [isNameValid, setIsNameValid] = useState<boolean | null>(null);
+  const navigate = useNavigate();
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const game = context.user.games.find((gameName) => gameName === name);
+    if (game !== undefined) {
+      setIsNameValid(false);
+      return;
+    } 
+    setIsNameValid(true);
+    const updatedUser = deepCloneUserState(context.user);
+    updatedUser.games.push(name);
+    updatedUser.userGame = name;
+    context.setUser(updatedUser);
+    navigate("/game");
   };
-  
-    return (
-        <>
-            <div className={classes.CreateGame} onClick={()=> joinGame("1")}>
-                Join game 1 {message}
-            </div>
-            <div className={classes.CreateGame} onClick={()=> joinGame("2")}>
-                Join game 2 {message}
-            </div>
-        </>
-    );
-}
 
-export default CreateGame
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = event.target.value;
+    setName(newName);
+  };
+  return (
+    <div className={classes.CreateGame}>
+      <form onSubmit={handleSubmit} className={classes.MyForm}>
+        <div>
+          <label htmlFor="name" className={classes.MyLabel}>
+            Choose Game Name:
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={name}
+            onChange={handleNameChange}
+            className={classes.MyInput}
+          />
+        </div>
+        {isNameValid === false && (
+          <div className={classes.ErrorMessage}>
+            Name already exists. Please choose a different name.
+          </div>
+        )}
+        <div>
+          <button type="submit" className={classes.MyButton}>
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default CreateGame;
