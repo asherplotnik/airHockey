@@ -73,8 +73,18 @@ const Game = () => {
     });
 
     socket.on('telemetry', payload => {
-      console.log(payload.telemetry);
-      setTelemetry(payload.telemetry);
+        let xPlayer = payload.telemetry.xPlayer;
+        let yPlayer = payload.telemetry.yPlayer;
+        const translatePosition = (xp: number, yp: number):ScreenPosition => {
+            if (xp > 0 && yp > 0) {
+                yp = screenSize.y - (yp / payload.telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
+                xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / payload.telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
+                console.log(xPlayer + "|"+yPlayer);
+                return {x:xp,y:yp};
+            }
+         }
+         
+         setPlayerPosition2(translatePosition(xPlayer, yPlayer));
     });
 
     setSocket(socket);
@@ -82,16 +92,6 @@ const Game = () => {
       socket.disconnect();
     };
   }, []);
-
-   useEffect(() => {
-     const translatePosition = (xp: number, yp: number):ScreenPosition => {
-        if (xp > 0 && yp > 0)
-        yp = screenSize.y - (yp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
-        xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
-        return {x:xp,y:yp};
-     }
-     setPlayerPosition2(translatePosition(telemetry?.xPlayer, telemetry?.yPlayer));
-   },[telemetry]);
 
   useEffect(()=> {
     const joinGame = (game: string) => {

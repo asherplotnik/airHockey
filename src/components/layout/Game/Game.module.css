@@ -49,6 +49,7 @@
 }
 
 .Player2 {
+    position:absolute;
     background-color: white;
     width: 5vh;
     height: 5vh;
