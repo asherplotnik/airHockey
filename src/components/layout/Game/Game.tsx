@@ -73,18 +73,19 @@ const Game = () => {
     });
 
     socket.on('telemetry', payload => {
-        let xPlayer = payload.telemetry.xPlayer;
-        let yPlayer = payload.telemetry.yPlayer;
-        const translatePosition = (xp: number, yp: number):ScreenPosition => {
+        
+        const translatePosition = (payload:any):ScreenPosition => {
+            const height = payload.telemetry?.height;
+            let xp = payload.telemetry.xPlayer;
+            let yp = payload.telemetry.yPlayer;
             if (xp > 0 && yp > 0) {
-                yp = screenSize.y - (yp / payload.telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
-                xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / payload.telemetry?.height * screenSize.y) - (screenSize.y / 20.5);
-                console.log(xPlayer + "|"+yPlayer);
+                yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 20.5);
+                xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / height * screenSize.y) - (screenSize.y / 20.5);
                 return {x:xp,y:yp};
             }
          }
          
-         setPlayerPosition2(translatePosition(xPlayer, yPlayer));
+         setPlayerPosition2(translatePosition(payload));
     });
 
     setSocket(socket);
