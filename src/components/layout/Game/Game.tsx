@@ -103,7 +103,7 @@ const Game = () => {
     if (context.user.userGame !== null){
         joinGame(context.user.userGame);
     }
-  },[])
+  },[socket])
 
   const sendTelemetry = () => {
     const telemetry: Telemetry = {
