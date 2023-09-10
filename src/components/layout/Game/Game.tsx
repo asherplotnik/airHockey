@@ -79,8 +79,8 @@ const Game = () => {
             let xp = payload.telemetry.xPlayer;
             let yp = payload.telemetry.yPlayer;
             if (xp > 0 && yp > 0) {
-                yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 20.5);
-                xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (xp / height * screenSize.y) - (screenSize.y / 20.5);
+                yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 16);
+                xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (screenSize.y / 41) - xp ;
                 return {x:xp,y:yp};
             }
          }
