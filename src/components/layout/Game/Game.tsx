@@ -79,11 +79,13 @@ const Game = () => {
         
         const translatePosition = (payload:any):ScreenPosition => {
             const height = payload.telemetry?.height;
+            const width = payload.telemetry?.width;
+            const ratioX = height / screenSize.y;
             let xp = payload.telemetry.xPlayer;
             let yp = payload.telemetry.yPlayer;
             if (xp > 0 && yp > 0) {
                 yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 16);
-                xp = (screenSize.x / 2) + (screenSize.y * 0.323877) - (screenSize.y / 41) - (xp / height * screenSize.y );
+                xp = screenSize.x * 0.323 + (screenSize.x/2 + screenSize.y*0.323) + screenSize.y/82 - xp/ratioX
                 return {x:xp,y:yp};
             }
          }
