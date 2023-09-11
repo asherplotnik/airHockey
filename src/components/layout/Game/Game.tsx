@@ -12,11 +12,14 @@ interface ScreenPosition {
 
 interface Telemetry {
     game: string;
+    id: string
     xPlayer: number;
     yPlayer: number;
     height:  number;
+    width: number
     xDisk: number;
     yDisk: number;
+
 }
 
 const Game = () => {
@@ -80,7 +83,7 @@ const Game = () => {
             let yp = payload.telemetry.yPlayer;
             if (xp > 0 && yp > 0) {
                 yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 16);
-                xp = (screenSize.x / 2) + (screenSize.y * 0.3) - (screenSize.y / 41) - xp ;
+                xp = (screenSize.x / 2) + (screenSize.y * 0.323877) - (screenSize.y / 41) - (xp / height * screenSize.y );
                 return {x:xp,y:yp};
             }
          }
@@ -109,7 +112,9 @@ const Game = () => {
   const sendTelemetry = () => {
     const telemetry: Telemetry = {
         game: context.user.userGame,
+        id: context.user.userId,
         height: window.innerHeight,
+        width: window.innerWidth,
         xPlayer: playerPosition.x,
         yPlayer: playerPosition.y,
         xDisk: diskPosition.x,
