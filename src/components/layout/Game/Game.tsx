@@ -78,13 +78,12 @@ const Game = () => {
             const ratioX = height / screenSize.y;
             let xp = payload.telemetry?.xPlayer;
             let yp = payload.telemetry?.yPlayer;
-            if (xp > 0 && yp > 0) {
+            if (xp >= 0 && yp >= 0) {
                 yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 16);
                 xp = (screenSize.x/2 + screenSize.y*0.323) - xp/ratioX -screenSize.y/20.5
                 return {x:xp,y:yp};
             }
          }
-         
          setPlayerPosition2(translatePosition(payload));
     });
 
@@ -108,8 +107,12 @@ const Game = () => {
 
   const sendTelemetry = () => {
     let playerX = playerPosition?.x  - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40);
+    let playerY = playerPosition?.y;
     if (!playerX){ 
         playerX=0;
+    };
+    if (!playerY){ 
+        playerY=0;
     };
     const telemetry: Telemetry = {
         game: context.user.userGame,
@@ -117,7 +120,7 @@ const Game = () => {
         height: window.innerHeight,
         width: window.innerWidth,
         xPlayer: playerX,
-        yPlayer: playerPosition.y,
+        yPlayer: playerY,
         xDisk: diskPosition.x,
         yDisk: diskPosition.y
     }
