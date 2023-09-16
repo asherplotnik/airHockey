@@ -81,7 +81,7 @@ const Game = () => {
             let yp = payload.telemetry?.yPlayer;
             if (xp > 0 && yp > 0) {
                 yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 16);
-                xp = screenSize.x * 0.323 + (screenSize.x/2 + screenSize.y*0.323) + screenSize.y/82 - xp/ratioX
+                xp = (screenSize.x/2 + screenSize.y*0.323) - xp/ratioX -screenSize.y/20.5
                 return {x:xp,y:yp};
             }
          }
@@ -109,7 +109,6 @@ const Game = () => {
 
   const sendTelemetry = () => {
     let playerX = playerPosition?.x  - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40);
-    console.log(playerX);
     if (!playerX){ 
         return;
     };
