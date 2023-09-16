@@ -72,14 +72,13 @@ const Game = () => {
     });
 
     socket.on('telemetry', payload => {
-        
+        console.log(payload.telemetry);
         const translatePosition = (payload:any):ScreenPosition => {
-            console.log(payload.telemetry);
             const height = payload.telemetry?.height;
             const width = payload.telemetry?.width;
             const ratioX = height / screenSize.y;
-            let xp = payload.telemetry.xPlayer;
-            let yp = payload.telemetry.yPlayer;
+            let xp = payload.telemetry?.xPlayer;
+            let yp = payload.telemetry?.yPlayer;
             if (xp > 0 && yp > 0) {
                 yp = screenSize.y - (yp / height * screenSize.y) - (screenSize.y / 16);
                 xp = screenSize.x * 0.323 + (screenSize.x/2 + screenSize.y*0.323) + screenSize.y/82 - xp/ratioX
@@ -109,12 +108,13 @@ const Game = () => {
   },[socket])
 
   const sendTelemetry = () => {
+    let playerX = playerPosition?.x  - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40);
     const telemetry: Telemetry = {
         game: context.user.userGame,
         id: context.user.userId,
         height: window.innerHeight,
         width: window.innerWidth,
-        xPlayer: playerPosition.x - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40),
+        xPlayer: playerX,
         yPlayer: playerPosition.y,
         xDisk: diskPosition.x,
         yDisk: diskPosition.y
