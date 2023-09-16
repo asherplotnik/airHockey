@@ -56,10 +56,6 @@ const Game = () => {
     x: playerPosition.x + screenSize.y / 41,
     y: playerPosition.y + screenSize.y / 41,
   } as ScreenPosition;
-  let playerCenter2 = {
-    x: playerPosition2.x + screenSize.y / 41,
-    y: playerPosition2.y + screenSize.y / 41,
-  } as ScreenPosition;
   let diskCenter = {
     x: diskPosition.x + screenSize.y / 51,
     y: diskPosition.y + screenSize.y / 51,
