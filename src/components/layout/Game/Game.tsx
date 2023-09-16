@@ -333,7 +333,7 @@ const Game = () => {
         <div className={classes.Area1}>
           <div 
             className={classes.Player2}
-            style={{ left: playerPosition2?.x, top: playerPosition2.y }}
+            style={{ left: playerPosition2?.x, top: playerPosition2?.y }}
           ></div>
         </div>
         <div className={classes.Area2}>
