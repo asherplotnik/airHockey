@@ -110,6 +110,9 @@ const Game = () => {
   const sendTelemetry = () => {
     let playerX = playerPosition?.x  - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40);
     console.log(playerX);
+    if (playerX < 0){ 
+        return;
+    };
     const telemetry: Telemetry = {
         game: context.user.userGame,
         id: context.user.userId,
