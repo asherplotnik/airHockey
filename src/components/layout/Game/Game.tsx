@@ -78,6 +78,7 @@ const Game = () => {
     socket.on('telemetry', payload => {
         
         const translatePosition = (payload:any):ScreenPosition => {
+            console.log(payload.telemetry);
             const height = payload.telemetry?.height;
             const width = payload.telemetry?.width;
             const ratioX = height / screenSize.y;
@@ -117,7 +118,7 @@ const Game = () => {
         id: context.user.userId,
         height: window.innerHeight,
         width: window.innerWidth,
-        xPlayer: playerPosition.x,
+        xPlayer: playerPosition.x - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40),
         yPlayer: playerPosition.y,
         xDisk: diskPosition.x,
         yDisk: diskPosition.y
