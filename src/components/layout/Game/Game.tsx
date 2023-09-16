@@ -72,7 +72,6 @@ const Game = () => {
     });
 
     socket.on('telemetry', payload => {
-        console.log(payload.telemetry);
         const translatePosition = (payload:any):ScreenPosition => {
             const height = payload.telemetry?.height;
             const width = payload.telemetry?.width;
@@ -110,7 +109,7 @@ const Game = () => {
   const sendTelemetry = () => {
     let playerX = playerPosition?.x  - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40);
     if (!playerX){ 
-        return;
+        playerX=0;
     };
     const telemetry: Telemetry = {
         game: context.user.userGame,
