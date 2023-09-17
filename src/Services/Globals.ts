@@ -6,7 +6,8 @@ class Globals {
 class DevelopmentGlobals extends Globals {
     public urls = {
         localUrl : "http://localhost:3000/api/v1/",
-        apiWs : "http://192.168.1.244:3000/ws"
+        apiWs : "http://192.168.1.244:3000/ws",
+        apiRest: "http://192.168.1.244:3000/api"
     };
 }
 
@@ -14,7 +15,8 @@ class DevelopmentGlobals extends Globals {
 class ProductionGlobals extends Globals {
     public urls = {
         localUrl : "https://goldfish-app-m83gp.ondigitalocean.app/api/v1/",
-        apiWs : "http://192.168.1.244:3000/ws"
+        apiWs : "http://192.168.1.244:3000/ws",
+        apiRest: "http://192.168.1.244:3000/api"
     };
 }
 
