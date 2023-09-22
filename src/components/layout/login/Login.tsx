@@ -11,7 +11,7 @@ const Login = () => {
   const [logged, setLogged] = useState(false);
   const navigate = useNavigate();
   const context = useUserContext();
-  let formRef = useRef(null);
+  const formRef = useRef();
   useEffect(()=>{
     if (logged) {
         navigate("/");

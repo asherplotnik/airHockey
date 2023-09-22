@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import classes from "./Game.module.css";
 import { useUserContext } from "../../../context/AppContext";
 import { Socket, io } from "socket.io-client";
@@ -74,7 +74,6 @@ const Game = () => {
     socket.on('telemetry', payload => {
         const translatePosition = (payload:any):ScreenPosition => {
             const height = payload.telemetry?.height;
-            const width = payload.telemetry?.width;
             const ratioX = height / screenSize.y;
             let xp = payload.telemetry?.xPlayer;
             let yp = payload.telemetry?.yPlayer;
@@ -135,13 +134,14 @@ const Game = () => {
       const minX = screenSize.x / 2 - screenSize.y * 0.325;
       const maxY = screenSize.y - screenSize.y / 22;
       const minY = screenSize.y / 150;
-      const x = diskPosition.x - diskSpeed.x / 100;
-      const y = diskPosition.y - diskSpeed.y / 100;
+      const duration = 0.12;
+      const x = (diskPosition.x - diskSpeed.x * duration);
+      const y = (diskPosition.y - diskSpeed.y * duration);
       let result = { x: diskPosition.x, y: diskPosition.y };
       if (diskPosition.x > minX && diskPosition.x < maxX) {
         result.x = x;
       } else {
-        result.x = diskPosition.x + diskSpeed.x / 100;
+        result.x = diskPosition.x + diskSpeed.x * duration;
         setDiskSpeed({ x: diskSpeed.x * -1, y: diskSpeed.y });
       }
       if (diskPosition.y > minY && diskPosition.y < maxY) {
@@ -152,7 +152,7 @@ const Game = () => {
           return;
         }
 
-        result.y = diskPosition.y + diskSpeed.y / 100;
+        result.y = diskPosition.y + diskSpeed.y * duration;
         setDiskSpeed({ x: diskSpeed.x, y: diskSpeed.y * -1 });
       }
       if (diskSpeed.x != 0 && diskSpeed.y != 0) {
@@ -186,7 +186,14 @@ const Game = () => {
       return false;
     };
 
-    setNewDiskPositionBySpeed();
+    const intervalId = setInterval(() => {
+        setNewDiskPositionBySpeed();
+    }, 2)
+
+    return () => {
+        clearInterval(intervalId);
+      };
+    
   }, [diskPosition, diskSpeed]);
 
   useEffect(() => {
@@ -272,8 +279,8 @@ const Game = () => {
       const minX = screenSize.x / 2 - screenSize.y * 0.325;
       const maxY = screenSize.y - screenSize.y / 22;
       const minY = screenSize.y / 30;
-      const x = prev.x - (playerCenter.x - diskCenter.x) / 6;
-      const y = prev.y - (playerCenter.y - diskCenter.y) / 6;
+      const x = prev.x - (playerCenter.x - diskCenter.x) / 40;
+      const y = prev.y - (playerCenter.y - diskCenter.y) / 40;
       let result = { x: prev.x, y: prev.y };
       if (prev.x > minX && prev.x < maxX) {
         result.x = x;

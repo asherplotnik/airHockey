@@ -9,7 +9,7 @@ export interface User {
 
 interface UserUpdater {
     user:User;
-    setUser: Function;
+    setUser: (user: User) => void;
 }
 export const AppContext = createContext<UserUpdater | undefined>(undefined);
 
