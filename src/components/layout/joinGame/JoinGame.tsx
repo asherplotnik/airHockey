@@ -42,6 +42,7 @@ const JoinGame = () => {
     })
     const updatedUser = deepCloneUserState(userContext.user);
     updatedUser.userGame = game;
+    updatedUser.creator = false;
     userContext.setUser(updatedUser);
     navigate("/game");
   };

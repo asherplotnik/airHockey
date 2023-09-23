@@ -4,6 +4,7 @@ export interface User {
     userId: string;
     userName: string;
     userGame: string;
+    creator: boolean;
     games: string[];
 }
 

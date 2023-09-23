@@ -45,6 +45,7 @@ const CreateGame = () => {
       const games = [...contextUser.games];
       games.push(name);
       contextUser.games = games;
+      contextUser.creator = true;
       context.setUser(contextUser);
   }
 

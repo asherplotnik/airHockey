@@ -48,14 +48,21 @@ const Game = () => {
     y: window.innerHeight,
   });
   const [diskPosition, setDiskPosition] = useState<ScreenPosition>({
-    x: window.innerWidth / 2 - window.innerWidth / 51,
-    y: window.innerHeight / 1.2,
+    x: window.innerWidth / 2 - screenSize.y / 51,
+    y:  userContext.creator ? window.innerHeight / 1.2 : window.innerHeight - (window.innerHeight / 1.2) - (window.innerHeight/51)*2,
   });
+  
   const [diskSpeed, setDiskSpeed] = useState<ScreenPosition>({ x: 0, y: 0 });
   let playerCenter = {
     x: playerPosition.x + screenSize.y / 41,
     y: playerPosition.y + screenSize.y / 41,
   } as ScreenPosition;
+
+  let playerCenter2 = {
+    x: playerPosition2?.x + screenSize.y / 41,
+    y: playerPosition2?.y + screenSize.y / 41,
+  } as ScreenPosition;
+
   let diskCenter = {
     x: diskPosition.x + screenSize.y / 51,
     y: diskPosition.y + screenSize.y / 51,
@@ -84,6 +91,7 @@ const Game = () => {
             }
          }
          setPlayerPosition2(translatePosition(payload));
+         //TODO adjust diskPosition
     });
 
     setSocket(socket);
@@ -134,14 +142,14 @@ const Game = () => {
       const minX = screenSize.x / 2 - screenSize.y * 0.325;
       const maxY = screenSize.y - screenSize.y / 22;
       const minY = screenSize.y / 150;
-      const duration = 0.12;
-      const x = (diskPosition.x - diskSpeed.x * duration);
-      const y = (diskPosition.y - diskSpeed.y * duration);
+      const speedAdjuster = 0.12;
+      const x = (diskPosition.x - diskSpeed.x * speedAdjuster);
+      const y = (diskPosition.y - diskSpeed.y * speedAdjuster);
       let result = { x: diskPosition.x, y: diskPosition.y };
       if (diskPosition.x > minX && diskPosition.x < maxX) {
         result.x = x;
       } else {
-        result.x = diskPosition.x + diskSpeed.x * duration;
+        result.x = diskPosition.x + diskSpeed.x * speedAdjuster;
         setDiskSpeed({ x: diskSpeed.x * -1, y: diskSpeed.y });
       }
       if (diskPosition.y > minY && diskPosition.y < maxY) {
@@ -152,7 +160,7 @@ const Game = () => {
           return;
         }
 
-        result.y = diskPosition.y + diskSpeed.y * duration;
+        result.y = diskPosition.y + diskSpeed.y * speedAdjuster;
         setDiskSpeed({ x: diskSpeed.x, y: diskSpeed.y * -1 });
       }
       if (diskSpeed.x != 0 && diskSpeed.y != 0) {
@@ -251,13 +259,13 @@ const Game = () => {
             Math.pow(playerCenter.y - diskCenter.y, 2)
         )
       ) {
-        const newPosition = calcNewDiskPosition(diskPosition);
+        const newPosition = calcNewDiskPosition(diskPosition, playerCenter);
         if (
           newPosition.x != diskPosition.x ||
           newPosition.y != diskPosition.y
         ) {
           setDiskPosition(newPosition);
-          setDiskSpeed(calcNewSpeed());
+          setDiskSpeed(calcNewSpeed(playerCenter));
         }
         if (
           newPosition.x == diskPosition.x &&
@@ -265,22 +273,40 @@ const Game = () => {
         ) {
           resetPlayer();
         }
+        sendTelemetry();
+      }
+
+      if (
+        screenSize.y / 41 + screenSize.y / 51 >
+        Math.sqrt(
+          Math.pow(playerCenter2.x - diskCenter.x, 2) +
+            Math.pow(playerCenter2.y - diskCenter.y, 2)
+        )
+      ) {
+        const newPosition = calcNewDiskPosition(diskPosition, playerCenter2);
+        if (
+            newPosition.x != diskPosition.x ||
+            newPosition.y != diskPosition.y
+          ) {
+            setDiskPosition(newPosition);
+            setDiskSpeed(calcNewSpeed(playerCenter2));
+          }
       }
     };
 
-    const calcNewSpeed = (): ScreenPosition => {
-      const x = playerCenter.x - diskCenter.x;
-      const y = playerCenter.y - diskCenter.y;
+    const calcNewSpeed = (pCenter: ScreenPosition): ScreenPosition => {
+      const x = pCenter.x - diskCenter.x;
+      const y = pCenter.y - diskCenter.y;
       return { x, y };
     };
 
-    const calcNewDiskPosition = (prev: ScreenPosition): ScreenPosition => {
+    const calcNewDiskPosition = (prev: ScreenPosition, pCenter: ScreenPosition): ScreenPosition => {
       const maxX = screenSize.x / 2 + screenSize.y * 0.285;
       const minX = screenSize.x / 2 - screenSize.y * 0.325;
       const maxY = screenSize.y - screenSize.y / 22;
       const minY = screenSize.y / 30;
-      const x = prev.x - (playerCenter.x - diskCenter.x) / 40;
-      const y = prev.y - (playerCenter.y - diskCenter.y) / 40;
+      const x = prev.x - (pCenter.x - diskCenter.x) / 40;
+      const y = prev.y - (pCenter.y - diskCenter.y) / 40;
       let result = { x: prev.x, y: prev.y };
       if (prev.x > minX && prev.x < maxX) {
         result.x = x;
@@ -310,7 +336,6 @@ const Game = () => {
       setPlayerPosition(resetPosition);
     };
     listenImpactDisk();
-    sendTelemetry();
   }, [diskPosition, playerPosition, screenSize]);
 
   return (
