@@ -199,7 +199,7 @@ const Game = () => {
       const minX = screenSize.x / 2 - screenSize.y * 0.325;
       const maxY = screenSize.y - screenSize.y / 22;
       const minY = screenSize.y / 150;
-      const speedAdjuster = 0.01;
+      const speedAdjuster = 0.02;
       const x = (diskPosition.x - diskSpeed.x * speedAdjuster);
       const y = (diskPosition.y - diskSpeed.y * speedAdjuster);
       let result = { x: diskPosition.x, y: diskPosition.y };
