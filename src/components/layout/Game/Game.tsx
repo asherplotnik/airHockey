@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import classes from "./Game.module.css";
 import { useUserContext } from "../../../context/AppContext";
 import { Socket, io } from "socket.io-client";
@@ -55,11 +55,6 @@ const Game = () => {
   let playerCenter = {
     x: playerPosition.x + screenSize.y / 41,
     y: playerPosition.y + screenSize.y / 41,
-  } as ScreenPosition;
-
-  let playerCenter2 = {
-    x: playerPosition2?.x + screenSize.y / 41,
-    y: playerPosition2?.y + screenSize.y / 41,
   } as ScreenPosition;
 
   let diskCenter = {
@@ -216,7 +211,6 @@ const Game = () => {
           resetGame();
           return;
         }
-
         result.y = diskPosition.y + diskSpeed.y * speedAdjuster;
         setDiskSpeed({ x: diskSpeed.x, y: diskSpeed.y * -1 });
       }
