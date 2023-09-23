@@ -3,6 +3,8 @@ import classes from "./Game.module.css";
 import { useUserContext } from "../../../context/AppContext";
 import { Socket, io } from "socket.io-client";
 import globals from "../../../Services/Globals";
+import { useNavigate } from "react-router-dom";
+import { deepCloneUserState } from "../../../Services/commonFunctionService";
 
 interface ScreenPosition {
   x: number;
@@ -30,6 +32,7 @@ const Game = () => {
   const [scoreP1, setScoreP1] = useState(0);
   const [scoreP2, setScoreP2] = useState(0);
   const userContext = useUserContext().user;
+  const navigate = useNavigate();
   const [mousePosition, setMousePosition] = useState<ScreenPosition>({
     x: 0,
     y: 0,
@@ -66,13 +69,14 @@ const Game = () => {
   };
 
   useEffect(() => {
-    const socket = io(globals.urls.apiWs); 
-    socket.on('message', payload => {
+    const newSocket = io(globals.urls.apiWs); 
+    newSocket.on('message', payload => {
+      console.log(payload.message);
       setMessage(payload.message);
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
-    socket.on('telemetry', payload => {
+    newSocket.on('telemetry', payload => {
         const translatePosition = (payload:any):ScreenPosition => {
             const height = payload.telemetry?.height;
             const ratioX = height / screenSize.y;
@@ -87,7 +91,7 @@ const Game = () => {
          setPlayerPosition2(translatePosition(payload));
     });
 
-    socket.on('impact', payload => {
+    newSocket.on('impact', payload => {
         const translatePlayerPosition = (payload:any):ScreenPosition => {
             const height = payload.telemetry?.height;
             const ratioX = height / screenSize.y;
@@ -117,9 +121,13 @@ const Game = () => {
          setDiskSpeed({x :payload.telemetry.diskSpeed.x*-1 , y: payload.telemetry.diskSpeed.y*-1 })
     });
 
-    setSocket(socket);
+    newSocket.on("game_over", () => {
+        closeGame();
+    })
+
+    setSocket(newSocket);
     return () => {
-      socket.disconnect();
+        newSocket.disconnect();
     };
   }, []);
 
@@ -221,13 +229,13 @@ const Game = () => {
 
     const resetGame = () => {
       if (diskPosition.y > window.innerHeight / 1.2) {
-        setScoreP1((prev) => prev + 1);
+        setScoreP2((prev) => prev + 1);
         setDiskPosition({
             x: window.innerWidth / 2 - window.innerHeight / 51,
             y: window.innerHeight / 1.2 
           });
       } else {
-        setScoreP2((prev) => prev + 1);
+        setScoreP1((prev) => prev + 1);
         setDiskPosition({
             x: window.innerWidth / 2 - window.innerHeight / 51,
             y: window.innerHeight - (window.innerHeight / 1.2) - (window.innerHeight/51)*2
@@ -240,6 +248,10 @@ const Game = () => {
         y: window.innerHeight / 1.2,
       });
       setDiskSpeed({ x: 0, y: 0 });
+      if (scoreP1 > 6 || scoreP2 > 6 ){
+        socket.emit("game_over", userContext.userGame );
+        closeGame();
+      }
     };
 
     const isGoal = (): boolean => {
@@ -378,6 +390,14 @@ const Game = () => {
     };
     listenImpactDisk();
   }, [diskPosition, playerPosition, playerPosition2, screenSize]);
+
+  const closeGame = () => {
+    const updateC = deepCloneUserState(userContext);
+    updateC.games = updateC.games.filter(game => game !== userContext.userGame)
+    updateC.userGame = null;
+    context.setUser(updateC);
+    navigate("/")
+  }
 
   return (
     <div className={classes.Game}>

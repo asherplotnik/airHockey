@@ -22,8 +22,6 @@ const JoinGame = () => {
           updatedUser.games = openGames;
           userContext.setUser(updatedUser);
           setGames(openGames);
-        } else {
-          alert("no open games yet!");
         }
       });
     };
@@ -46,24 +44,28 @@ const JoinGame = () => {
     userContext.setUser(updatedUser);
     navigate("/game");
   };
+
   return (
     <div className={classes.JoinGame}>
-      <div className={classes.GameList}>
-        <h2>Choose a Game </h2>
-        <ul>
-          {games.map((game, index) => (
-            <li
-              key={index}
-              onClick={() => handleClick(game)}
-              className={
-                selectedGame === game ? classes.Selected : classes.GameItem
-              }
-            >
-              {game}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {games.length > 0 &&
+        <div className={classes.GameList}>
+            <h2>Choose a Game </h2>
+            <ul>
+            {games.map((game, index) => (
+                <li
+                key={index}
+                onClick={() => handleClick(game)}
+                className={
+                    selectedGame === game ? classes.Selected : classes.GameItem
+                }
+                >
+                {game}
+                </li>
+            ))}
+            </ul>
+        </div>
+      }
+      {(games.length === 0) &&  <div className={classes.GameList}><h2>No open games</h2></div>}
     </div>
   );
 };
