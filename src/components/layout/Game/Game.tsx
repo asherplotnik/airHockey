@@ -19,14 +19,13 @@ interface Telemetry {
     width: number
     xDisk: number;
     yDisk: number;
-
+    diskSpeed: ScreenPosition;
 }
 
 const Game = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [message, setMessage] = useState<string>('');
   const [messages, setMessages] = useState<string[]>([]);
-  const [telemetry, setTelemetry] = useState<Telemetry | null>(null);
   const context = useUserContext();
   const [scoreP1, setScoreP1] = useState(0);
   const [scoreP2, setScoreP2] = useState(0);
@@ -48,8 +47,8 @@ const Game = () => {
     y: window.innerHeight,
   });
   const [diskPosition, setDiskPosition] = useState<ScreenPosition>({
-    x: window.innerWidth / 2 - screenSize.y / 51,
-    y:  userContext.creator ? window.innerHeight / 1.2 : window.innerHeight - (window.innerHeight / 1.2) - (window.innerHeight/51)*2,
+    x: window.innerWidth / 2 - window.innerHeight / 51,
+    y: userContext.creator ? window.innerHeight / 1.2 : window.innerHeight - (window.innerHeight / 1.2) - (window.innerHeight/51)*2,
   });
   
   const [diskSpeed, setDiskSpeed] = useState<ScreenPosition>({ x: 0, y: 0 });
@@ -91,7 +90,36 @@ const Game = () => {
             }
          }
          setPlayerPosition2(translatePosition(payload));
-         //TODO adjust diskPosition
+    });
+
+    socket.on('impact', payload => {
+        const translatePlayerPosition = (payload:any):ScreenPosition => {
+            const height = payload.telemetry?.height;
+            const ratioX = height / screenSize.y;
+            let xp = payload.telemetry?.xPlayer;
+            let yp = payload.telemetry?.yPlayer;
+            if (xp >= 0 && yp >= 0) {
+                yp = screenSize.y - (yp / ratioX) - (screenSize.y / 16);
+                xp = (screenSize.x/2 + screenSize.y*0.323) - xp/ratioX - screenSize.y/20.5
+                return {x:xp,y:yp};
+            }
+         }
+
+         const translateDiskPosition = (payload:any):ScreenPosition => {
+            const height = payload.telemetry?.height;
+            const ratioX = height / screenSize.y;
+            let xd = payload.telemetry?.xDisk;
+            let yd = payload.telemetry?.yDisk;
+            if (xd >= 0 && yd >= 0) {
+                yd = screenSize.y - (yd / ratioX) - (screenSize.y / 16);
+                xd = (screenSize.x/2 + screenSize.y*0.323) - xd/ratioX - screenSize.y/25.5
+                return {x:xd,y:yd};
+            }
+         }
+
+         setPlayerPosition2(translatePlayerPosition(payload));
+         setDiskPosition(translateDiskPosition(payload));
+         setDiskSpeed({x :payload.telemetry.diskSpeed.x*-1 , y: payload.telemetry.diskSpeed.y*-1 })
     });
 
     setSocket(socket);
@@ -115,6 +143,8 @@ const Game = () => {
   const sendTelemetry = () => {
     let playerX = playerPosition?.x  - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40);
     let playerY = playerPosition?.y;
+    let diskX = diskPosition?.x - (screenSize.x / 2 - screenSize.y * 0.3- screenSize.y / 50)
+    let diskY = diskPosition?.y;
     if (!playerX){ 
         playerX=0;
     };
@@ -128,11 +158,38 @@ const Game = () => {
         width: window.innerWidth,
         xPlayer: playerX,
         yPlayer: playerY,
-        xDisk: diskPosition.x,
-        yDisk: diskPosition.y
+        xDisk: diskX,
+        yDisk: diskY,
+        diskSpeed: {x: diskSpeed.x , y: diskSpeed.y }
     }
     if(socket) {
         socket.emit("telemetry", telemetry)
+    }
+  }
+  const sendImpact = (dSpeed:ScreenPosition) => {
+    let playerX = playerPosition?.x  - (screenSize.x / 2 - screenSize.y * 0.3 - screenSize.y / 40);
+    let playerY = playerPosition?.y;
+    let diskX = diskPosition?.x - (screenSize.x / 2 - screenSize.y * 0.3- screenSize.y / 50)
+    let diskY = diskPosition?.y;
+    if (!playerX){ 
+        playerX=0;
+    };
+    if (!playerY){ 
+        playerY=0;
+    };
+    const telemetry: Telemetry = {
+        game: context.user.userGame,
+        id: context.user.userId,
+        height: window.innerHeight,
+        width: window.innerWidth,
+        xPlayer: playerX,
+        yPlayer: playerY,
+        xDisk: diskX,
+        yDisk: diskY,
+        diskSpeed: dSpeed
+    }
+    if(socket) {
+        socket.emit("impact", telemetry)
     }
   }
 
@@ -142,7 +199,7 @@ const Game = () => {
       const minX = screenSize.x / 2 - screenSize.y * 0.325;
       const maxY = screenSize.y - screenSize.y / 22;
       const minY = screenSize.y / 150;
-      const speedAdjuster = 0.12;
+      const speedAdjuster = 0.01;
       const x = (diskPosition.x - diskSpeed.x * speedAdjuster);
       const y = (diskPosition.y - diskSpeed.y * speedAdjuster);
       let result = { x: diskPosition.x, y: diskPosition.y };
@@ -171,13 +228,19 @@ const Game = () => {
     const resetGame = () => {
       if (diskPosition.y > window.innerHeight / 1.2) {
         setScoreP1((prev) => prev + 1);
+        setDiskPosition({
+            x: window.innerWidth / 2 - window.innerHeight / 51,
+            y: window.innerHeight / 1.2 
+          });
       } else {
         setScoreP2((prev) => prev + 1);
+        setDiskPosition({
+            x: window.innerWidth / 2 - window.innerHeight / 51,
+            y: window.innerHeight - (window.innerHeight / 1.2) - (window.innerHeight/51)*2
+            
+          });
       }
-      setDiskPosition({
-        x: window.innerWidth / 2 - window.innerWidth / 51,
-        y: window.innerHeight / 1.2,
-      });
+      
       setPlayerPosition({
         x: window.innerWidth / 2 - window.innerWidth / 10,
         y: window.innerHeight / 1.2,
@@ -273,25 +336,9 @@ const Game = () => {
         ) {
           resetPlayer();
         }
-        sendTelemetry();
+        sendImpact(calcNewSpeed(playerCenter));
       }
 
-      if (
-        screenSize.y / 41 + screenSize.y / 51 >
-        Math.sqrt(
-          Math.pow(playerCenter2.x - diskCenter.x, 2) +
-            Math.pow(playerCenter2.y - diskCenter.y, 2)
-        )
-      ) {
-        const newPosition = calcNewDiskPosition(diskPosition, playerCenter2);
-        if (
-            newPosition.x != diskPosition.x ||
-            newPosition.y != diskPosition.y
-          ) {
-            setDiskPosition(newPosition);
-            setDiskSpeed(calcNewSpeed(playerCenter2));
-          }
-      }
     };
 
     const calcNewSpeed = (pCenter: ScreenPosition): ScreenPosition => {
@@ -336,7 +383,7 @@ const Game = () => {
       setPlayerPosition(resetPosition);
     };
     listenImpactDisk();
-  }, [diskPosition, playerPosition, screenSize]);
+  }, [diskPosition, playerPosition, playerPosition2, screenSize]);
 
   return (
     <div className={classes.Game}>
@@ -347,15 +394,18 @@ const Game = () => {
       <div className={classes.PositionDisk}>
         disk: ( {Math.round(diskCenter.x)} | {Math.round(diskCenter.y)} )
         <br />
+        disk speed: ({diskSpeed.x} | {diskSpeed.y})
         <br />
         <div className={classes.PositionDisk}>Game: {userContext.userGame}</div>
         <br />
         screen height: {window.innerHeight}
         <br />
+        screen width: {window.innerWidth}
         <br />
-        Player 1 : {scoreP1}
         <br />
-        Player 2 : {scoreP2}
+        Me : {scoreP1}
+        <br />
+        Opponent : {scoreP2}
       </div>
       <div className={classes.PositionDisk}></div>
       <div className={classes.Goal1}></div>
