@@ -13,8 +13,8 @@ class DevelopmentGlobals extends Globals {
 // Global settings which are suitable only for production:
 class ProductionGlobals extends Globals {
     public urls = {
-        apiWs : "https://monkfish-app-udzxj.ondigitalocean.app:8080/ws",
-        apiRest: "https://monkfish-app-udzxj.ondigitalocean.app:8080/api"
+        apiWs : "https://monkfish-app-udzxj.ondigitalocean.app/ws",
+        apiRest: "https://monkfish-app-udzxj.ondigitalocean.app/api"
     };
 }
 
