@@ -14,53 +14,18 @@ export const errorAlert = (error:any) => {
     }
 }
 
-interface DecodedSession {
-    sub:string;
-    exp:number;
-    iat:number;
-}
-
-// export const isSessionNotExpired = (session:SessionModel):boolean => {
-//     if (session?.token) {
-//         const token = session.token;
-//         const decodedSession: DecodedSession = jwt_decode(token);
-//         if (decodedSession){
-//            if (Math.floor(Math.floor(Date.now() / 1000)) < decodedSession.exp){
-//              return true;
-//          }
-//         }
-//     }   
-//     return false;
-// }
-
-// export const isStoreSessionNotExpired = ():boolean => {
-//     const session = store.getState().SessionState.session;
-//     if (session?.token) {
-//         const token = session.token;
-//         const decodedSession: DecodedSession = jwt_decode(token);
-//         if (decodedSession){
-//            if (Math.floor(Math.floor(Date.now() / 1000)) < decodedSession.exp){
-//              return true;
-//          }
-//         }
-//     }   
-//     return false;
-// }
-
-// export const resetSessionIfExpired = () => {
-//    const session = store.getState().SessionState.session;
-//     if (session.token){
-//         if (!isSessionNotExpired(session)) {
-//             store.dispatch(removeSessionAction());
-//         }
-//     }
+// interface DecodedSession {
+//     sub:string;
+//     exp:number;
+//     iat:number;
 // }
 
 export const deepCloneUserState = (newUser:User):User => {
-    const updatedUser:User = {userId:null, userName:null, userGame:null, games:[]}
+    const updatedUser:User = {userId:null, userName:null, userGame:null, creator: null, games:[]}
     updatedUser.userId = newUser.userId;
     updatedUser.userName = newUser.userName;
     updatedUser.userGame = newUser.userGame;
+    updatedUser.creator = newUser.creator;
     updatedUser.games = [...newUser.games];
     return updatedUser;
 }

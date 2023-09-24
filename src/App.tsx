@@ -8,15 +8,16 @@ import { useState } from "react";
 import { AppContext, User } from "./context/AppContext";
 import Login from "./components/layout/login/Login";
 const App = () => {
-    const [user, setUser] = useState<User>({
-        userId: null,
-        userName: null,
-        userGame: null,
-        games: [],
-    });
+  const [user, setUser] = useState<User>({
+    userId: null,
+    userName: null,
+    userGame: null,
+    creator: null,
+    games: [],
+  });
 
   return (
-    <AppContext.Provider value={{user, setUser}}>
+    <AppContext.Provider value={{ user, setUser }}>
       <div className={classes.App}>
         <Routes>
           <Route path="/game" Component={Game} />

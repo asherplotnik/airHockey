@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import classes from "./CreateGame.module.css";
 import { useNavigate } from "react-router-dom";
 import { deepCloneUserState } from "../../../Services/commonFunctionService";
-import { User, useUserContext } from "../../../context/AppContext";
+import { useUserContext } from "../../../context/AppContext";
 import axios from "axios";
 import globals from "../../../Services/Globals";
 

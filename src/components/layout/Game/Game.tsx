@@ -26,8 +26,6 @@ interface Telemetry {
 
 const Game = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [message, setMessage] = useState<string>('');
-  const [messages, setMessages] = useState<string[]>([]);
   const context = useUserContext();
   const [scoreP1, setScoreP1] = useState(0);
   const [scoreP2, setScoreP2] = useState(0);
@@ -70,12 +68,7 @@ const Game = () => {
 
   useEffect(() => {
     const newSocket = io(globals.urls.apiWs); 
-    newSocket.on('message', payload => {
-      console.log(payload.message);
-      setMessage(payload.message);
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
+    
     newSocket.on('telemetry', payload => {
         const translatePosition = (payload:any):ScreenPosition => {
             const height = payload.telemetry?.height;

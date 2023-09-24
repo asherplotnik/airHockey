@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import classes from "./Home.module.css";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../../../context/AppContext";

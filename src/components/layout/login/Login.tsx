@@ -38,7 +38,7 @@ const Login = () => {
             console.log("empty response");
         }
         console.log(res);
-        const newUser: User = {userId: res.data.userId, userName: res.data.userName, userGame: null, games:context.user.games};
+        const newUser: User = {userId: res.data.userId, userName: res.data.userName, creator:null, userGame: null, games:context.user.games};
         context.setUser(newUser);
         setLogged(true);        
       })
